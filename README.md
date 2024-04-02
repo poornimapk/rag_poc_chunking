@@ -2,7 +2,7 @@
 
 ## 1. Document/Text processing and embedding creation
 
-### - Import PDF documents
+### - Import PDF documents - Done
 ### - Process text for embedding (split into chunks of sentences)
 ### - Embed text chunks with embedding model.
 ### - Save embeddings to Vector store.
