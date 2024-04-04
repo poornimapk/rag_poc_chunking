@@ -3,6 +3,7 @@ import random
 import pandas as pd
 import pytest
 from spacy.lang.en import English
+import re
 
 def text_formatter(text: str) -> str:
     """Performs minor formatting on text."""
@@ -55,12 +56,49 @@ def split_texts_to_sentences(pages_and_texts) -> list[dict]:
     nlp.add_pipe("sentencizer")
     for item in tqdm(pages_and_texts):
         item["sentences"] = list(nlp(item["text"]).sents)
-        item["sentences"] = [str(sentence) for sentence in item["sentences"]]
+        item["sentences"] = [str(sentence).strip() for sentence in item["sentences"]]
         item["page_sentence_count_spacy"] = len(item["sentences"])
     return pages_and_texts
 
+
+def split_list(input_list: list,
+               slice_size: int) -> list[list[str]]:
+    # tmp_list = []
+    # for i in range(0, len(input_list), slice_size):
+    #     tmp_list.append(input_list[i:i + slice_size])
+    # print(tmp_list)
+    # return tmp_list
+    return [input_list[i:i + slice_size] for i in range(0, len(input_list), slice_size)]
+
+
+def generate_pages_and_chunks(pages_and_texts: list[dict]) -> list[dict]:
+    pages_and_chunks = []
+    for item in tqdm(pages_and_texts):
+        for sentence_chunk in item["sentence_chunks"]:
+            chunk_dict = {}
+            chunk_dict["page_number"] = item["page_number"]
+
+            # Join the sentences together into a paragraph-like structure, aka a chunk (so they are a single string)
+            joined_sentence_chunk = "".join(sentence_chunk).replace(" ", " ").strip()
+            joined_sentence_chunk = re.sub(r'\.(A-Z)', r'. \1', joined_sentence_chunk)
+            chunk_dict["sentence_chunk"] = joined_sentence_chunk
+
+            # Get stats about chunks
+            chunk_dict["chunk_char_count"] = len(joined_sentence_chunk)
+            chunk_dict["chunk_word_count"] = len([word for word in joined_sentence_chunk.split(" ")])
+            chunk_dict["chunk_token_count"] = len(joined_sentence_chunk)
+
+            pages_and_chunks.append(chunk_dict)
+
+    return pages_and_chunks
+
+
+
+
 def main():
     pages_and_texts = open_and_read_pdf("data/oracle/March-12(Quarterly)-24.pdf")
+    # pages_and_texts = open_and_read_pdf("data/oracle/March-12(Quarterly)-22.pdf")
+    # pages_and_texts = open_and_read_pdf("data/oracle/September-12(Quarterly)-22.pdf")
     # The workflow which we are following:
     # Ingest text -> split it into groups/chunks -> embed the groups/chunks -> use the embeddings
     random_pages_and_texts = random.sample(pages_and_texts, k=3)
@@ -72,12 +110,44 @@ def main():
     # print(df.describe().round(2))
     pages_and_texts = split_texts_to_sentences(pages_and_texts)
     # print(random.sample(pages_and_texts, k=1))
-    df = pd.DataFrame(pages_and_texts)
-    # For our set of text, it looks like our raw sentence count
-    # (e.g. splitting on ". ") is quite close to what spaCy came up with.
-    print(df.describe().round(2))
+    item: list = random.sample(pages_and_texts, k=1)
+    num_sentence_chunk_size = 10
 
     # Chunk our sentences together
+    # Loop through pages and texts and split sentences into chunks
+    for item in tqdm(pages_and_texts):
+        item["sentence_chunks"] = split_list(input_list=item["sentences"],
+                                             slice_size=num_sentence_chunk_size)
+        item["num_chunks"] = len(item["sentence_chunks"])
+
+    # print(random.sample(pages_and_texts, k=1))
+
+    pages_and_chunks = generate_pages_and_chunks(pages_and_texts)
+    # print(len(pages_and_chunks))
+    # print(random.sample(pages_and_chunks, k=1))
+    # print(item)
+    df = pd.DataFrame(pages_and_chunks)
+    # Show random chunks with under 30 tokens in length
+    min_token_length = 30
+
+    # Below code is to check any chunks are there with <= 30 which we want to remove from our chunks list
+    # They are mostly header footer details which does not make sense to add to the chunks
+    # count_of_chunks = 1
+    # for row in df[df["chunk_token_count"] <= min_token_length].iterrows():
+    #     print(f'Chunk token count: {row[1]["chunk_token_count"]} | Text: {row[1]["sentence_chunk"]}')
+    #     count_of_chunks += 1
+    # print(count_of_chunks)
+
+    pages_and_chunks_over_min_token_len = df[df["chunk_token_count"] > min_token_length].to_dict(orient="records")
+    print(pages_and_chunks_over_min_token_len)
+
+    # print(df.head())
+    # print(df.describe().round(2))
+
+
+
+
+
 
 if __name__ == '__main__':
     main()
