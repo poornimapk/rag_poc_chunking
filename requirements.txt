@@ -11,4 +11,7 @@ accelerate
 bitsandbytes
 jupyter
 wheel
+llama-index
+pytest
+llama-index-vector-stores-milvus
 # flash-attn

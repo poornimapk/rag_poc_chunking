@@ -1,1 +1,35 @@
-[{'page_number': -1, 'sentence_chunk': 'Table of Contents     UNITED STATES SECURITIES AND EXCHANGE COMMISSION Washington, D.C. 20549   FORM 10-Q ☒ QUARTERLY REPORT PURSUANT TO SECTION 13 OR 15(d) OF THE SECURITIES EXCHANGE ACT OF 1934 For the quarterly period ended February 29, 2024 or ☐ TRANSITION REPORT PURSUANT TO SECTION 13 OR 15(d) OF THE SECURITIES EXCHANGE ACT OF 1934 For the transiƟon period from ____________ to ____________ Commission File Number: 001-35992   Oracle CorporaƟon (Exact name of registrant as speciﬁed in its charter)   Delaware   54-2185193 (State or other jurisdicƟon of incorporaƟon or organizaƟon)   (I.R.S. Employer IdenƟﬁcaƟon No.)2300 Oracle Way AusƟn, Texas    78741 (Address of principal execuƟve oﬃces)    (Zip Code)   (737) 867-1000 (Registrant’s telephone number, including area code)  SecuriƟes registered pursuant to SecƟon 12(b) of the Act:   Title of each class Trading Symbol(s) Name of each exchange on which registered Common Stock, par value $0.01 per share  3.125% senior notes due July 2025  ORCL — New York Stock Exchange  New York Stock Exchange  Indicate by check mark whether the registrant (1) has ﬁled all reports required to be ﬁled by SecƟon 13 or 15(d) of the SecuriƟes Exchange Act of 1934 during the preceding 12 months (or  for such shorter period that the registrant was required to ﬁle such reports), and (2) has been subject to such ﬁling requirements for the past 90 days.Yes    ☒    No  ☐ Indicate by check mark whether the registrant has submiƩed electronically every InteracƟve Data File required to be submiƩed pursuant to Rule 405 of RegulaƟon S-T (§232.405 of this  chapter) during the preceding 12 months (or for such shorter period that the registrant was required to submit such ﬁles).Yes    ☒  No  ☐ Indicate by check mark whether the registrant is a large accelerated ﬁler, an accelerated ﬁler, a non-accelerated ﬁler, a smaller reporƟng company or an emerging growth company.See  the deﬁniƟons of “large accelerated ﬁler,” “accelerated ﬁler,” “smaller reporƟng company” and “emerging growth company” in Rule 12b-2 of the Exchange Act.Large accelerated ﬁler   ☒   Accelerated ﬁler   ☐ Non-accelerated ﬁler   ☐   Smaller reporƟng company   ☐     Emerging growth company   ☐   If an emerging growth company, indicate by check mark if the registrant has elected not to use the extended transiƟon period for complying with any new or revised ﬁnancial accounƟng  standards provided pursuant to SecƟon 13(a) of the Exchange Act.☐ Indicate by check mark whether the registrant is a shell company (as deﬁned in Rule 12b-2 of the Exchange Act).Yes    ☐  No    ☒ The number of shares of registrant’s common stock outstanding as of March 7, 2024 was: 2,748,514,000.', 'chunk_char_count': 2691, 'chunk_word_count': 489, 'chunk_token_count': 2691}, {'page_number': 0, 'sentence_chunk': 'Table of Contents   ORACLE CORPORATION  FORM 10-Q QUARTERLY REPORT   TABLE OF CONTENTS          Page          PART I.  FINANCIAL INFORMATION   3           Item 1.Financial Statements (Unaudited)   3              Condensed Consolidated Balance Sheets as of February 29, 2024 and May 31, 2023   3              Condensed Consolidated Statements of OperaƟons for the Three and Nine Months Ended February 29, 2024 and February 28, 2023   4              Condensed Consolidated Statements of Comprehensive Income for the Three and Nine Months Ended February 29, 2024 and  February 28, 2023   5              Condensed Consolidated Statements of Stockholders’ Equity (Deﬁcit) for the Three and Nine Months Ended February 29, 2024 and  February 28, 2023   6              Condensed Consolidated Statements of Cash Flows for the Nine Months Ended February 29, 2024 and February 28, 2023   7              Notes to Condensed Consolidated Financial Statements   8           Item 2.Management’s Discussion and Analysis of Financial CondiƟon and Results of OperaƟons   22           Item 3.QuanƟtaƟve and QualitaƟve Disclosures About Market Risk   38           Item 4.Controls and Procedures   39           PART II.OTHER INFORMATION   40           Item 1.Legal Proceedings   40           Item 1A.  Risk Factors   40           Item 2.Unregistered Sales of Equity SecuriƟes and Use of Proceeds   40           Item 5.Other InformaƟon   41           Item 6.Exhibits   42              Signatures   43', 'chunk_char_count': 1477, 'chunk_word_count': 440, 'chunk_token_count': 1477}]
+37 secs to 39 secs - all-mpnet-base-v2 - Total embeddings - 76 - 109M params
+
+[[ 0.02456943 -0.00604986 -0.02269166 ... -0.0453723  -0.07974299
+  -0.06605529]
+ [ 0.01670619 -0.00413959 -0.02111947 ... -0.03952925 -0.03897613
+  -0.04346479]
+ [ 0.04904491  0.01689146 -0.01866952 ... -0.04437537 -0.02606643
+  -0.05504699]
+ ...
+ [ 0.03694833 -0.01649474 -0.00102323 ... -0.0004161  -0.07819229
+  -0.03348909]
+ [ 0.04815671  0.07968594 -0.01636689 ... -0.01681031 -0.03331645
+  -0.03458491]
+ [ 0.0330458   0.01355883  0.00035938 ... -0.02027309 -0.07000457
+  -0.03981917]]
+
+
+  3.5 secs - sentence-transformers/all-MiniLM-L12-v2 Total embeddings - 76 - 33.4M params
+
+  [[-0.01881305  0.01842794 -0.04379764 ...  0.02837444 -0.01507318
+  -0.01565052]
+ [-0.01335941  0.05759375 -0.07351661 ...  0.03677639  0.00719978
+   0.02224382]
+ [-0.00768507  0.06409101 -0.02325706 ...  0.06780109  0.04072532
+   0.03090072]
+ ...
+ [ 0.05729919  0.07756843 -0.04600383 ...  0.00903058  0.03617066
+   0.01871165]
+ [-0.06241561  0.04402135 -0.0117123  ... -0.04017404  0.02596279
+  -0.010015  ]
+ [ 0.04263382  0.03397964 -0.04843988 ...  0.00468559 -0.00546988
+  -0.00863359]]
+
+  302 embeddings in 15 secs
+302 embeddings in 1 min 2 min 3 secs
