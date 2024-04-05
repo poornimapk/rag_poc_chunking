@@ -189,7 +189,7 @@ def chunk_and_embed(file_name_with_path):
     for item in tqdm(pages_and_chunks_over_min_token_len):
         # item["embedding"] = embedding_model.encode(item["sentence_chunk"],
         #                                            batch_size=32,).tolist()
-        item["embedding"] = embedding_model.encode(item["sentence_chunk"],).tolist()
+        item["embedding"] = embedding_model.encode(item["sentence_chunk"], ).tolist()
 
     # Turn text chunks into a single list
     # text_chunks = [item["sentence_chunk"] for item in pages_and_chunks_over_min_token_len]
@@ -209,7 +209,6 @@ def main():
     # print(pages_and_chunks)
     # print(pages_and_chunks[0])
 
-
     vector_store = MilvusVectorStore(dim=384,
                                      collection_name="chunked_store",
                                      overwrite=True,
@@ -223,7 +222,11 @@ def main():
     # print(type(pages_and_chunks), type(pages_and_chunks[0]))
     for item in tqdm(pages_and_chunks):
         # record = {"id_": uuid.uuid4(), "embedding": (None,), "metadata": item}
-        record = TextNode(id_=str(uuid.uuid4()), embedding=item["embedding"], text=str(f'{item["file_name"]} \n {item["page_number"]} \n {item["sentence_chunk"]}'))
+        record = TextNode(id_=str(uuid.uuid4()),
+                          embedding=item["embedding"],
+                          text=item["sentence_chunk"],
+                          metadata={"filename": item["file_name"],
+                                    "page_number": item["page_number"]})
         milvus_records.append(record)
         # print(item)
     # print(milvus_records)
@@ -234,11 +237,10 @@ def main():
     # vector_store.add(nodes=pages_and_chunks)
     #
     # index = VectorStoreIndex.from_vector_store(vector_store)
-    llm = OpenAI(model="gpt-3.5-turbo")
-    query_engine = index.as_query_engine(llm=llm)
-    response = query_engine.query("What is the total revenues of Oracle corporation by February 29 2024?")
-    print(response)
-
+    # llm = OpenAI(model="gpt-3.5-turbo")
+    # query_engine = index.as_query_engine(llm=llm)
+    # response = query_engine.query("What is the total revenues of Oracle corporation by February 29 2024?")
+    # print(response)
 
 
 if __name__ == '__main__':
