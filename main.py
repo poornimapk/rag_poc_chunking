@@ -2,6 +2,7 @@ import json
 import time
 import uuid
 
+import pandas
 from tqdm.auto import tqdm
 import random
 import pandas as pd
@@ -13,6 +14,32 @@ from llama_index.core import VectorStoreIndex, StorageContext
 from llama_index.core.schema import TextNode
 from llama_index.vector_stores.milvus import MilvusVectorStore
 from llama_index.llms.openai import OpenAI
+from llama_index.embeddings.huggingface import HuggingFaceEmbedding
+from llama_index.core import Settings
+from pymilvus import (DataType,
+                      connections,
+                      CollectionSchema,
+                      FieldSchema,
+                      Collection,
+                      utility, )
+
+# Const values
+_HOST = '192.168.1.19'
+_PORT = '19530'
+_COLLECTION_NAME = 'chunked_rag_store'
+_ID_FIELD_NAME = 'id'
+_VECTOR_FIELD_NAME = 'embedding'
+
+# Vector parameters
+_DIM = 384
+_INDEX_FILE_SIZE = 32  # max file size of stored index
+
+# Index parameters
+_METRIC_TYPE = 'L2'
+_INDEX_TYPE = 'IVF_FLAT'
+_NLIST = 1024
+_NPROBE = 16
+_TOPK = 3
 
 
 def text_formatter(text: str) -> str:
@@ -105,7 +132,7 @@ def generate_pages_and_chunks(pages_and_texts: list[dict]) -> list[dict]:
     return pages_and_chunks
 
 
-def chunk_and_embed(file_name_with_path):
+def chunk_and_embed(file_name_with_path) -> dict | list[dict]:
     # pages_and_texts = open_and_read_pdf("data/oracle/March-12(Quarterly)-22.pdf")
     pages_and_texts = open_and_read_pdf(file_name_with_path)
     # pages_and_texts = open_and_read_pdf("data/oracle/March-12(Quarterly)-22.pdf")
@@ -166,7 +193,10 @@ def chunk_and_embed(file_name_with_path):
     # Rank: 75 embedding vector size of 384
     # whether smaller vector size encodes more information into embedding is currently questionable,
     # since smaller, better model are outperforming larger ones.
-    embedding_model = SentenceTransformer(model_name_or_path="sentence-transformers/all-MiniLM-L12-v2",
+    # embedding_model = SentenceTransformer(model_name_or_path="sentence-transformers/all-MiniLM-L12-v2",
+    #                                       device="cpu")
+
+    embedding_model = SentenceTransformer(model_name_or_path="BAAI/bge-small-en-v1.5",
                                           device="cpu")
 
     # This is the best model in the leaderboard, but takes a long time to load model since it has 7.11 billion params
@@ -204,15 +234,88 @@ def chunk_and_embed(file_name_with_path):
     return pages_and_chunks_over_min_token_len
 
 
+def create_milvus_connection():
+    print(f'\nCreate Milvus Connection...')
+    connections.connect(host=_HOST,
+                        port=_PORT)
+    print(f'\nList Milvus Connections: ')
+    print(connections.list_connections())
+
+
+def create_collection(name, id_field, vector_field) -> Collection:
+    field1 = FieldSchema(name=id_field,
+                         dtype=DataType.VARCHAR,
+                         description="int64",
+                         max_length=256,
+                         is_primary=True)
+    field2 = FieldSchema(name=vector_field,
+                         dtype=DataType.FLOAT_VECTOR,
+                         description="float vector",
+                         dim=_DIM,
+                         is_primary=False)
+    schema = CollectionSchema(fields=[field1, field2],
+                              description="vector store",
+                              enable_dynamic_field=True, )
+    collection = Collection(name=name,
+                            data={},
+                            schema=schema,
+                            properties={"collection.ttl.seconds": 15})
+    print(f'\nCollection created: ', name)
+    return collection
+
+
+def drop_collection(name):
+    collection = Collection(name)
+    collection.drop()
+    print("\nDrop Collection: {}".format(name))
+
+
+def has_collection(name):
+    return utility.has_collection(name)
+
+
 def main():
-    pages_and_chunks = chunk_and_embed("data/oracle/March-12(Quarterly)-22.pdf")
+    # Create a connection to Milvus
+    create_milvus_connection()
+
+    # Drop a collection if already exists
+    if has_collection(_COLLECTION_NAME):
+        drop_collection(_COLLECTION_NAME)
+
+    # Create Collection
+    collection = create_collection(_COLLECTION_NAME,
+                                   _ID_FIELD_NAME,
+                                   _VECTOR_FIELD_NAME)
+
+    print('Success so far!')
+
+    pages_and_chunks = chunk_and_embed("data/oracle/March-12(Quarterly)-24.pdf")
+    data = []
+    for item in tqdm(pages_and_chunks):
+        record = {"id": str(uuid.uuid4()),
+                  "embedding": item["embedding"] or None,
+                  # "text": item["sentence_chunk"] or None,
+                  # "metadata": {"filename": item["file_name"] or None,
+                  #              "page_number": item["page_number"] or None
+                  #              }
+                  }
+        data.append(record)
+
+    res = collection.insert(data)
+    collection.flush()
+    print('Records inserted to Milvus!')
+
+
+'''
+def main():
+    pages_and_chunks = chunk_and_embed("data/oracle/paul-graham-ideas.pdf")
     # print(pages_and_chunks)
     # print(pages_and_chunks[0])
 
-    vector_store = MilvusVectorStore(dim=384,
-                                     collection_name="chunked_store",
-                                     overwrite=True,
-                                     )
+    # vector_store = MilvusVectorStore(dim=384,
+                                       collection_name="chunked_store",
+    #                                  overwrite=True,
+    #                                  )
 
     # vector_store = MilvusVectorStore(collection_name="chunked_store",
     #                                  overwrite=True,
@@ -223,25 +326,28 @@ def main():
     for item in tqdm(pages_and_chunks):
         # record = {"id_": uuid.uuid4(), "embedding": (None,), "metadata": item}
         record = TextNode(id_=str(uuid.uuid4()),
-                          embedding=item["embedding"],
-                          text=item["sentence_chunk"],
-                          metadata={"filename": item["file_name"],
-                                    "page_number": item["page_number"]})
+                          embedding=item["embedding"] or None,
+                          text=item["sentence_chunk"] or None,
+                          metadata={"filename": item["file_name"] or None,
+                                    "page_number": item["page_number"] or None})
         milvus_records.append(record)
         # print(item)
     # print(milvus_records)
-    vector_store.add(nodes=milvus_records)
-    index = VectorStoreIndex.from_vector_store(vector_store=vector_store)
-
+    # vector_store.add(nodes=milvus_records)
+    # embedding_model = SentenceTransformer(model_name_or_path="BAAI/bge-small-en-v1.5",
+    #                                       device="cpu")
+    # index = VectorStoreIndex.from_vector_store(vector_store=vector_store,)
+    index = VectorStoreIndex(nodes=milvus_records, storage_context=StorageContext.from_defaults(vector_store=vector_store))
     print("success")
-    # vector_store.add(nodes=pages_and_chunks)
-    #
-    # index = VectorStoreIndex.from_vector_store(vector_store)
-    # llm = OpenAI(model="gpt-3.5-turbo")
-    # query_engine = index.as_query_engine(llm=llm)
-    # response = query_engine.query("What is the total revenues of Oracle corporation by February 29 2024?")
-    # print(response)
 
+    llm = OpenAI(model="gpt-3.5-turbo")
+    query_engine = index.as_query_engine(llm=llm)
+    query_string = ("What is the total revenues of Oracle corporation by February 29 2024?")
+
+    # encoded_query_string = embedding_model.encode(query_string)
+    response = query_engine.query("What happens when your mind wanders?")
+    print(response)
+'''
 
 if __name__ == '__main__':
     main()

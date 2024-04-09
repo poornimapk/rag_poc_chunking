@@ -13,5 +13,6 @@ jupyter
 wheel
 llama-index
 pytest
+pymilvus
 llama-index-vector-stores-milvus
 # flash-attn
