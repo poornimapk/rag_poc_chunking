@@ -4,7 +4,7 @@ numpy==1.26.4
 pandas==2.2.1
 Requests==2.31.0
 sentence_transformers==2.5.1
-spacy
+spacy~=3.7.4
 tqdm==4.66.2
 transformers==4.38.2
 accelerate
@@ -12,7 +12,10 @@ bitsandbytes
 jupyter
 wheel
 llama-index
-pytest
-pymilvus
+pytest~=8.1.1
+pymilvus~=2.3.7
 llama-index-vector-stores-milvus
 # flash-attn
+openai~=1.17.0
+tenacity~=8.2.3
+python-dotenv~=1.0.1
