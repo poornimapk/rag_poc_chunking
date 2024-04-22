@@ -159,7 +159,7 @@ def main():
     #                                  collection_name="chunked_rag_store",
     #                                  overwrite=False)
     storage_context = StorageContext.from_defaults(vector_store=vector_store)
-    Settings.llm = Ollama(model="mistral")
+    Settings.llm = Ollama(model="llama3")
     index = VectorStoreIndex.from_documents(
         documents, storage_context=storage_context
     )
